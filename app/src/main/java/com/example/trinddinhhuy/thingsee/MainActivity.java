@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TabHost;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -31,11 +32,75 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String               username, password;
     private String[]             positions = new String[MAXPOSITIONS];
     private ArrayAdapter<String> myAdapter;
+    private TabHost tabHost;
+    private Button btnStart, btnEnd;
+    private TextView txtStartingPosition, txtEndPosition, txtDistance;
+    private double latitude;
+    private double longitude;
+    private float distance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        addControls();
+        addListeners();
+
+
+
+        // check that we know username and password for the Thingsee cloud
+        SharedPreferences prefGet = getSharedPreferences(PREFERENCEID, Activity.MODE_PRIVATE);
+        username = prefGet.getString("username", "");
+        password = prefGet.getString("password", "");
+        if (username.length() == 0 || password.length() == 0)
+            // no, ask them from the user
+            queryDialog(this, getResources().getString(R.string.prompt));
+    }
+
+    private void addListeners() {
+        btnStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                txtStartingPosition.setText(" (" + latitude + "," +
+                        longitude + ")");
+                distance = 0;
+            }
+        });
+
+        btnEnd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                txtEndPosition.setText(" (" + latitude + "," +
+                        longitude + ")");
+                txtDistance.setText(txtDistance+"");
+
+            }
+        });
+    }
+
+    private void addControls() {
+        //Connect view in tab2
+        btnEnd = (Button) findViewById(R.id.btnEnd);
+        btnStart = (Button) findViewById(R.id.btnStart);
+        txtStartingPosition = (TextView) findViewById(R.id.txtStartingPosition);
+        txtEndPosition = (TextView) findViewById(R.id.txtEndingPosition);
+        txtDistance = (TextView) findViewById(R.id.txtDistance);
+
+        //Set up tab host
+        tabHost = (TabHost) findViewById(R.id.tabHost);
+        tabHost.setup();
+
+        TabHost.TabSpec tab1 = tabHost.newTabSpec("tab1");
+        tab1.setIndicator("Request data");
+        tab1.setContent(R.id.tab1);
+        tabHost.addTab(tab1);
+
+        TabHost.TabSpec tab2 = tabHost.newTabSpec("tab2");
+        tab1.setIndicator("Measure distance");
+        tab1.setContent(R.id.tab2);
+        tabHost.addTab(tab2);
+
 
         // initialize the array so that every position has an object (even it is empty string)
         for (int i = 0; i < positions.length; i++)
@@ -50,14 +115,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // setup the button event listener to receive onClick events
         ((Button)findViewById(R.id.myButton)).setOnClickListener(this);
-
-        // check that we know username and password for the Thingsee cloud
-        SharedPreferences prefGet = getSharedPreferences(PREFERENCEID, Activity.MODE_PRIVATE);
-        username = prefGet.getString("username", "");
-        password = prefGet.getString("password", "");
-        if (username.length() == 0 || password.length() == 0)
-            // no, ask them from the user
-            queryDialog(this, getResources().getString(R.string.prompt));
     }
 
     private void queryDialog(Context context, String msg) {
@@ -156,9 +213,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 for (int i = 0; i < coordinates.size(); i++) {
                     Location loc = coordinates.get(i);
 
+                    //measure distance
+                    if(i>0) {
+                        Location previousLoc = coordinates.get(i - 1);
+                        distance = distance + previousLoc.distanceTo(loc);
+                    }
+
+                    latitude = loc.getLatitude();
+                    longitude = loc.getLongitude();
+
                     positions[i] = (new Date(loc.getTime())) +
                             " (" + loc.getLatitude() + "," +
                             loc.getLongitude() + ")"; //coordinates.get(i).toString();
+
+
                 }
             } else {
                 // no, tell that to the user and ask a new username/password pair
