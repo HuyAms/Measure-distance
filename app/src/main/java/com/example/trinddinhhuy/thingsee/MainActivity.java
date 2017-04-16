@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onClick(View v) {
                 txtEndPosition.setText(" (" + latitude + "," +
                         longitude + ")");
-                txtDistance.setText(txtDistance+"");
+                txtDistance.setText(Float.toString(distance));
 
             }
         });
@@ -97,8 +97,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tabHost.addTab(tab1);
 
         TabHost.TabSpec tab2 = tabHost.newTabSpec("tab2");
-        tab1.setIndicator("Measure distance");
-        tab1.setContent(R.id.tab2);
+        tab2.setIndicator("Measure distance");
+        tab2.setContent(R.id.tab2);
         tabHost.addTab(tab2);
 
 
