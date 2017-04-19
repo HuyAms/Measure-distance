@@ -6,4 +6,5 @@
     <string name="info_prompt">Invalid username/password or no connection to Thingsee, give Thingsee username and password</string>
 
     <string name="no_connection">No connection to Thingsee</string>
+    <string name="title_activity_maps">Map</string>
 </resources>

@@ -61,6 +61,18 @@
 
                     <include
                         layout="@layout/measure_distance" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/tab3"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <include
+                        layout="@layout/activity_maps" />
+
                 </LinearLayout>
 
             </FrameLayout>

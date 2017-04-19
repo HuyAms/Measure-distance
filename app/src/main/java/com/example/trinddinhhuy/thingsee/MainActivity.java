@@ -4,9 +4,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.AsyncTask;
+
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +21,14 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 
@@ -25,12 +36,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private static final int    MAXPOSITIONS = 20;
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, OnMapReadyCallback {
+    private static final int MAXPOSITIONS = 20;
     private static final String PREFERENCEID = "Credentials";
+    private static final int SLEEP_TIME = 10; //10s
 
-    private String               username, password;
-    private String[]             positions = new String[MAXPOSITIONS];
+    private String username, password;
+    private String[] positions = new String[MAXPOSITIONS];
     private ArrayAdapter<String> myAdapter;
     private TabHost tabHost;
     private Button btnStart, btnEnd;
@@ -38,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private double latitude;
     private double longitude;
     private float distance;
+    private GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +59,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         addControls();
         addListeners();
-
 
 
         // check that we know username and password for the Thingsee cloud
@@ -59,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void addListeners() {
+        //Button start
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -68,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        //Button end
         btnEnd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -77,7 +91,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             }
         });
+
+        tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+            @Override
+            public void onTabChanged(String tabId) {
+                if (tabId.equals("tab3")) {
+                    //Google map
+                    // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+                    SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                            .findFragmentById(R.id.map);
+                    mapFragment.getMapAsync(MainActivity.this);
+                }
+            }
+        });
+
+
     }
+
 
     private void addControls() {
         //Connect view in tab2
@@ -97,9 +127,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tabHost.addTab(tab1);
 
         TabHost.TabSpec tab2 = tabHost.newTabSpec("tab2");
-        tab2.setIndicator("Measure distance");
+        tab2.setIndicator("Distance");
         tab2.setContent(R.id.tab2);
         tabHost.addTab(tab2);
+
+        TabHost.TabSpec tab3 = tabHost.newTabSpec("tab3");
+        tab3.setIndicator("Map");
+        tab3.setContent(R.id.tab3);
+        tabHost.addTab(tab3);
 
 
         // initialize the array so that every position has an object (even it is empty string)
@@ -114,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         listView.setAdapter(myAdapter);
 
         // setup the button event listener to receive onClick events
-        ((Button)findViewById(R.id.myButton)).setOnClickListener(this);
+        ((Button) findViewById(R.id.myButton)).setOnClickListener(this);
     }
 
     private void queryDialog(Context context, String msg) {
@@ -127,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // set prompts.xml to alertdialog builder
         alertDialogBuilder.setView(promptsView);
 
-        final TextView dialogMsg      = (TextView) promptsView.findViewById(R.id.textViewDialogMsg);
+        final TextView dialogMsg = (TextView) promptsView.findViewById(R.id.textViewDialogMsg);
         final EditText dialogUsername = (EditText) promptsView.findViewById(R.id.editTextDialogUsername);
         final EditText dialogPassword = (EditText) promptsView.findViewById(R.id.editTextDialogPassword);
 
@@ -140,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setCancelable(false)
                 .setPositiveButton("OK",
                         new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
+                            public void onClick(DialogInterface dialog, int id) {
                                 // get user input and set it to result
                                 username = dialogUsername.getText().toString();
                                 password = dialogPassword.getText().toString();
@@ -154,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         })
                 .setNegativeButton("Cancel",
                         new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
+                            public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                             }
                         });
@@ -166,41 +201,56 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         alertDialog.show();
     }
 
+
     public void onClick(View v) {
         Log.d("USR", "Button pressed");
 
         // we make the request to the Thingsee cloud server in backgroud
         // (AsyncTask) so that we don't block the UI (to prevent ANR state, Android Not Responding)
-        new TalkToThingsee().execute("QueryState");
+            new TalkToThingsee().execute("QueryState");
+
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        mMap.clear();
+        LatLng location = new LatLng(latitude, longitude);
+        mMap.addMarker(new MarkerOptions().position(location).title("Thing see"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 16));
     }
 
     /* This class communicates with the ThingSee client on a separate thread (background processing)
      * so that it does not slow down the user interface (UI)
      */
     private class TalkToThingsee extends AsyncTask<String, Integer, String> {
-        ThingSee       thingsee;
+        ThingSee thingsee;
         List<Location> coordinates = new ArrayList<Location>();
 
         @Override
         protected String doInBackground(String... params) {
+
             String result = "NOT OK";
 
             // here we make the request to the cloud server for MAXPOSITION number of coordinates
             try {
-                thingsee = new ThingSee(username, password);
 
-                JSONArray events = thingsee.Events(thingsee.Devices(), MAXPOSITIONS);
-                //System.out.println(events);
-                coordinates = thingsee.getPath(events);
+                    thingsee = new ThingSee(username, password);
+
+                    JSONArray events = thingsee.Events(thingsee.Devices(), MAXPOSITIONS);
+                    //System.out.println(events);
+                    coordinates = thingsee.getPath(events);
 
 //                for (Location coordinate: coordinates)
 //                    System.out.println(coordinate);
-                result = "OK";
-            } catch(Exception e) {
+                    result = "OK";
+
+            } catch (Exception e) {
                 Log.d("NET", "Communication error: " + e.getMessage());
             }
 
             return result;
+
         }
 
         @Override
@@ -214,10 +264,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Location loc = coordinates.get(i);
 
                     //measure distance
-                    if(i>0) {
+                    if (i > 0) {
                         Location previousLoc = coordinates.get(i - 1);
-                        distance = distance + previousLoc.distanceTo(loc);
+                        //get previous time and time
+                        long previousTime = previousLoc.getTime();
+                        long time = loc.getTime();
+
+                        //calculate distance from location to previous location
+                        float newDistance = previousLoc.distanceTo(loc);
+
+                        Toast.makeText(MainActivity.this, newDistance + "", Toast.LENGTH_SHORT).show();
+                        //add distance only if new distance>1 and time is different form previous time
+                        if (newDistance > 1 && previousTime!=time)
+                            distance = distance + newDistance;
                     }
+
+                    //set latitude and longitude
 
                     latitude = loc.getLatitude();
                     longitude = loc.getLongitude();
@@ -226,8 +288,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             " (" + loc.getLatitude() + "," +
                             loc.getLongitude() + ")"; //coordinates.get(i).toString();
 
-
+                    myAdapter.notifyDataSetChanged();
                 }
+
             } else {
                 // no, tell that to the user and ask a new username/password pair
                 positions[0] = getResources().getString(R.string.no_connection);
@@ -245,6 +308,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         @Override
-        protected void onProgressUpdate(Integer... values) {}
+        protected void onProgressUpdate(Integer... values) {
+        }
     }
 }
