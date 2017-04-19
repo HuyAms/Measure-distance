@@ -35,6 +35,8 @@ import org.json.JSONArray;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, OnMapReadyCallback {
     private static final int MAXPOSITIONS = 20;
@@ -51,11 +53,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private double longitude;
     private float distance;
     private GoogleMap mMap;
+    private Timer timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //Timer task
+        timer = new Timer();
+        TimerTask t = new TimerTask(){
+            public void run(){
+                Log.i("TIMER", "timer");
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // This code will always run on the UI thread, therefore is safe to modify UI elements.
+                        new TalkToThingsee().execute("QueryState");
+                    }
+                });
+
+            }
+
+        };
+        timer.scheduleAtFixedRate(t, 10000, 10000);
 
         addControls();
         addListeners();
@@ -69,6 +90,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // no, ask them from the user
             queryDialog(this, getResources().getString(R.string.prompt));
     }
+
+
+
 
     private void addListeners() {
         //Button start
@@ -149,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         listView.setAdapter(myAdapter);
 
         // setup the button event listener to receive onClick events
-        ((Button) findViewById(R.id.myButton)).setOnClickListener(this);
+        //((Button) findViewById(R.id.myButton)).setOnClickListener(this);
     }
 
     private void queryDialog(Context context, String msg) {
@@ -207,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // we make the request to the Thingsee cloud server in backgroud
         // (AsyncTask) so that we don't block the UI (to prevent ANR state, Android Not Responding)
-            new TalkToThingsee().execute("QueryState");
+            //new TalkToThingsee().execute("QueryState");
 
     }
 
@@ -223,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     /* This class communicates with the ThingSee client on a separate thread (background processing)
      * so that it does not slow down the user interface (UI)
      */
-    private class TalkToThingsee extends AsyncTask<String, Integer, String> {
+    private class TalkToThingsee extends AsyncTask<String, String, String> {
         ThingSee thingsee;
         List<Location> coordinates = new ArrayList<Location>();
 
@@ -244,6 +268,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                for (Location coordinate: coordinates)
 //                    System.out.println(coordinate);
                     result = "OK";
+
+               // publishProgress(result);
 
             } catch (Exception e) {
                 Log.d("NET", "Communication error: " + e.getMessage());
@@ -308,7 +334,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         @Override
-        protected void onProgressUpdate(Integer... values) {
+        protected void onProgressUpdate(String... params) {
+           // String result = params[0];
+
+
         }
     }
 }
