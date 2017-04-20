@@ -41,7 +41,7 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, OnMapReadyCallback {
     private static final int MAXPOSITIONS = 20;
     private static final String PREFERENCEID = "Credentials";
-    private static final int SLEEP_TIME = 10; //10s
+    private static final int SLEEP_TIME = 10000 ; //10s
 
     private String username, password;
     private String[] positions = new String[MAXPOSITIONS];
@@ -69,14 +69,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void run() {
                         // This code will always run on the UI thread, therefore is safe to modify UI elements.
-                        new TalkToThingsee().execute("QueryState");
+                        new TalkToThingsee().execute("QueryState"); //request data from thing see
                     }
                 });
 
             }
 
         };
-        timer.scheduleAtFixedRate(t, 10000, 10000);
+        timer.scheduleAtFixedRate(t, SLEEP_TIME, SLEEP_TIME);
 
         addControls();
         addListeners();
@@ -116,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        //Listen for Tab Map
         tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
             @Override
             public void onTabChanged(String tabId) {
@@ -141,20 +142,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         txtEndPosition = (TextView) findViewById(R.id.txtEndingPosition);
         txtDistance = (TextView) findViewById(R.id.txtDistance);
 
-        //Set up tab host
+        // setup the button and listener for Request Button
+        //((Button) findViewById(R.id.myButton)).setOnClickListener(this);
+
+        // Set up tab host
         tabHost = (TabHost) findViewById(R.id.tabHost);
         tabHost.setup();
-
+        //Tab request data
         TabHost.TabSpec tab1 = tabHost.newTabSpec("tab1");
         tab1.setIndicator("Request data");
         tab1.setContent(R.id.tab1);
         tabHost.addTab(tab1);
-
+        //Tab Distance
         TabHost.TabSpec tab2 = tabHost.newTabSpec("tab2");
         tab2.setIndicator("Distance");
         tab2.setContent(R.id.tab2);
         tabHost.addTab(tab2);
-
+        //Tab Map
         TabHost.TabSpec tab3 = tabHost.newTabSpec("tab3");
         tab3.setIndicator("Map");
         tab3.setContent(R.id.tab3);
@@ -172,8 +176,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ListView listView = (ListView) findViewById(R.id.mylist);
         listView.setAdapter(myAdapter);
 
-        // setup the button event listener to receive onClick events
-        //((Button) findViewById(R.id.myButton)).setOnClickListener(this);
+
     }
 
     private void queryDialog(Context context, String msg) {
@@ -235,10 +238,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    //Google map
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        //Create and clear the map
         mMap = googleMap;
         mMap.clear();
+        //Add marker for specific location
         LatLng location = new LatLng(latitude, longitude);
         mMap.addMarker(new MarkerOptions().position(location).title("Thing see"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 16));
