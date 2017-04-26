@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 txtStartingPosition.setText(" (" + latitude + "," +
                         longitude + ")");
                 distance = 0;
+                txtEndPosition.setText("");
             }
         });
 
@@ -273,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 //                for (Location coordinate: coordinates)
 //                    System.out.println(coordinate);
-                    result = "OK";
+                      result = "OK";
 
                // publishProgress(result);
 
@@ -313,8 +314,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     //set latitude and longitude
 
-                    latitude = loc.getLatitude();
-                    longitude = loc.getLongitude();
+                    latitude = coordinates.get(0).getLatitude();
+                    longitude = coordinates.get(0).getLongitude();
 
                     positions[i] = (new Date(loc.getTime())) +
                             " (" + loc.getLatitude() + "," +
