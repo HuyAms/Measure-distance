@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TabHost;
@@ -48,12 +49,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ArrayAdapter<String> myAdapter;
     private TabHost tabHost;
     private Button btnStart, btnEnd;
-    private TextView txtStartingPosition, txtEndPosition, txtDistance;
+    private TextView txtStartingPosition, txtEndPosition, txtDistance, txtAverageSpeed;
     private double latitude;
     private double longitude;
     private float distance;
     private GoogleMap mMap;
     private Timer timer;
+    private Chronometer chronometer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,8 +82,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         addControls();
         addListeners();
+        checkAccount();
+    }
 
-
+    private void checkAccount() {
         // check that we know username and password for the Thingsee cloud
         SharedPreferences prefGet = getSharedPreferences(PREFERENCEID, Activity.MODE_PRIVATE);
         username = prefGet.getString("username", "");
@@ -90,8 +94,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // no, ask them from the user
             queryDialog(this, getResources().getString(R.string.prompt));
     }
-
-
 
 
     private void addListeners() {
@@ -103,6 +105,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         longitude + ")");
                 distance = 0;
                 txtEndPosition.setText("");
+
+                //Set chronometer
+                chronometer.setBase(SystemClock.elapsedRealtime());
+                chronometer.start();
+
+                //disable start button util end button is clicked
+                btnStart.setEnabled(false);
+
             }
         });
 
@@ -114,10 +124,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         longitude + ")");
                 txtDistance.setText(Float.toString(distance));
 
+                //Set chronmeter
+                chronometer.stop();
+
+                //Enable start button
+                btnStart.setEnabled(true);
+
             }
         });
 
-        //Listen for Tab Map
+        //Listen to Tab host Map
         tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
             @Override
             public void onTabChanged(String tabId) {
@@ -142,6 +158,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         txtStartingPosition = (TextView) findViewById(R.id.txtStartingPosition);
         txtEndPosition = (TextView) findViewById(R.id.txtEndingPosition);
         txtDistance = (TextView) findViewById(R.id.txtDistance);
+        txtAverageSpeed = (TextView) findViewById(R.id.txtAverageSpeed);
+        chronometer = (Chronometer) findViewById(R.id.chronmeter);
 
         // setup the button and listener for Request Button
         //((Button) findViewById(R.id.myButton)).setOnClickListener(this);
@@ -151,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tabHost.setup();
         //Tab request data
         TabHost.TabSpec tab1 = tabHost.newTabSpec("tab1");
-        tab1.setIndicator("Request data");
+        tab1.setIndicator("Data");
         tab1.setContent(R.id.tab1);
         tabHost.addTab(tab1);
         //Tab Distance
@@ -236,6 +254,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // we make the request to the Thingsee cloud server in backgroud
         // (AsyncTask) so that we don't block the UI (to prevent ANR state, Android Not Responding)
             //new TalkToThingsee().execute("QueryState");
+        checkAccount();
 
     }
 
