@@ -25,11 +25,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.trinddinhhuy.adapter.CustomAdapter;
+import com.example.trinddinhhuy.adapter.CustomInfoAdapter;
+import com.example.trinddinhhuy.model.Environment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
@@ -47,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private String username, password;
     private ArrayList<Location> locationList;
+    private List<Environment> environmentList;
     private CustomAdapter myAdapter;
     private TabHost tabHost;
     private Button btnStart, btnEnd, btnSwitchAccount;
@@ -58,15 +62,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Timer timer;
     private TimerTask t;
     private Chronometer chronometer;
+    private Environment environment;
+    private boolean isNewAccount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        checkAccount();
+
 
         requestData();
+
+        checkAccount();
 
         addControls();
 
@@ -114,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View v) {
                 Log.d("USR", "Button pressed");
                 //switch accout then request data
+                isNewAccount = true;
                 queryDialog(MainActivity.this, getResources().getString(R.string.prompt));
 
             }
@@ -174,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     private void addControls() {
+        environment = new Environment();
         //Connect view
         btnEnd = (Button) findViewById(R.id.btnEnd);
         btnStart = (Button) findViewById(R.id.btnStart);
@@ -204,8 +214,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         tabHost.addTab(tab3);
 
 
-        // initialize location list
+        // initialize location and environment list
         locationList = new ArrayList<>();
+        environmentList = new ArrayList<>();
 
         // setup the adapter for the array
         myAdapter = new CustomAdapter(MainActivity.this, R.layout.custom_listview, locationList);
@@ -232,8 +243,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         final EditText dialogPassword = (EditText) promptsView.findViewById(R.id.editTextDialogPassword);
 
         dialogMsg.setText(msg);
-        dialogUsername.setText(username);
-        dialogPassword.setText(password);
+
+        if(isNewAccount){
+            dialogUsername.setText("");
+            dialogPassword.setText("");
+        }else {
+            dialogUsername.setText(username);
+            dialogPassword.setText(password);
+        }
+        isNewAccount = false;
 
         // set dialog message
         alertDialogBuilder
@@ -278,8 +296,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.clear();
         //Add marker for specific location
         LatLng location = new LatLng(latitude, longitude);
-        mMap.addMarker(new MarkerOptions().position(location).title("Thing see"));
+        Marker marker = mMap.addMarker(new MarkerOptions().position(location).title("You are here"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 16));
+        mMap.setInfoWindowAdapter(new CustomInfoAdapter(MainActivity.this, environment));
+        marker.showInfoWindow();
     }
 
     /* This class communicates with the ThingSee client on a separate thread (background processing)
@@ -302,6 +322,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     JSONArray events = thingsee.Events(thingsee.Devices(), MAXPOSITIONS);
                     //System.out.println(events);
                     coordinates = thingsee.getPath(events);
+                    environmentList = thingsee.getEnvironment(events);
+                    //Log.i("ENVIRONMENT", environmentList.size()+"");
 
 //                for (Location coordinate: coordinates)
 //                    System.out.println(coordinate);
@@ -321,6 +343,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         protected void onPostExecute(String result) {
             // check that the background communication with the client was succesfull
             if (result.equals("OK")) {
+                // now the environmentList variable has those coordinates
+                // elements of these environmentList is the Environmentn object who has
+                // fields for temperature, humidity and airPressure when the position was fixed
+                for (int i = 0; i < environmentList.size(); i++) {
+                    environment = environmentList.get(i);
+                    Log.i("ENVIRONMENT", environment.toString());
+                }
+
                 // now the coordinates variable has those coordinates
                 // elements of these coordinates is the Location object who has
                 // fields for longitude, latitude and time when the position was fixed

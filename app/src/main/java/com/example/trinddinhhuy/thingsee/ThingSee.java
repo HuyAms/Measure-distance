@@ -18,6 +18,8 @@ package com.example.trinddinhhuy.thingsee;
 import android.location.Location;
 import android.util.Log;
 
+import com.example.trinddinhhuy.model.Environment;
+
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -210,6 +212,7 @@ public class ThingSee {
                             loc.setLongitude(value);
                             k++;
                             break;
+
                     }
 
                     if (k == 2) {
@@ -223,6 +226,66 @@ public class ThingSee {
         }
         
         return coordinates;
+    }
+
+    /**
+     * Obtain Environment objects from the events array
+     * <p>
+     * Collects all environment events and construct Environment object
+     *
+     * @param  events Device JSON description (given by Devices() method)
+     * @return        List of Environment objects (environmentList), empty if there are no environment available
+     * @throws        Exception Gives an exception with text information if there was an error
+     */
+    public List getEnvironment(JSONArray events) throws Exception {
+        List   environmentList = new ArrayList();
+        int    k;
+
+        try {
+            for (int i = 0; i < events.length(); i++) {
+                JSONObject event = events.getJSONObject(i);
+                Environment environment   = new Environment();
+
+                k = 0;
+                JSONArray senses = event.getJSONObject("cause").getJSONArray("senses");
+                for (int j = 0; j < senses.length(); j++) {
+                    JSONObject sense   = senses.getJSONObject(j);
+                    int        senseID = Integer.decode(sense.getString("sId"));
+                    double     value   = sense.getDouble("val");
+
+
+                    switch (senseID) {
+                        case GROUP_ENVIRONMENT | PROPERTY1:
+                            environment.setTemperature(value);
+                            k++;
+                            break;
+
+                        case GROUP_ENVIRONMENT | PROPERTY2:
+                            environment.setHumidity(value);
+                            k++;
+                            break;
+
+                        case GROUP_ENVIRONMENT | PROPERTY4:
+                            environment.setAirPressure(value);
+                            k++;
+                            break;
+                        case GROUP_SPEED | PROPERTY1:
+                            environment.setSpeed(value);
+                            k++;
+                            break;
+                    }
+
+                    if (k == 4) {
+                        environmentList.add(environment);
+                        k = 0;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception("No environment");
+        }
+
+        return environmentList;
     }
     
     @Override
