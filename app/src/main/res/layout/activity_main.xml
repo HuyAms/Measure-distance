@@ -40,7 +40,7 @@
                     android:orientation="vertical">
 
                     <Button
-                        android:id="@+id/myButton"
+                        android:id="@+id/btnSwitchAccount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
