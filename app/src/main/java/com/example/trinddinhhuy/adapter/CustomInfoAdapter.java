@@ -1,7 +1,6 @@
 package com.example.trinddinhhuy.adapter;
 
 import android.app.Activity;
-import android.icu.text.DecimalFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;

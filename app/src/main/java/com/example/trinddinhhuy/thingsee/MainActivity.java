@@ -138,6 +138,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 txtEndPosition.setText("");
 
                 //Set chronometer
+                chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener(){
+                    @Override
+                    public void onChronometerTick(Chronometer cArg) {
+                        long time = SystemClock.elapsedRealtime() - cArg.getBase();
+                        int h   = (int)(time /3600000);
+                        int m = (int)(time - h*3600000)/60000;
+                        int s= (int)(time - h*3600000- m*60000)/1000 ;
+                        String hh = h < 10 ? "0"+h: h+"";
+                        String mm = m < 10 ? "0"+m: m+"";
+                        String ss = s < 10 ? "0"+s: s+"";
+                        cArg.setText(hh+":"+mm+":"+ss);
+                    }
+                });
                 chronometer.setBase(SystemClock.elapsedRealtime());
                 chronometer.start();
 
@@ -184,6 +197,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void addControls() {
         environment = new Environment();
+
         //Connect view
         btnEnd = (Button) findViewById(R.id.btnEnd);
         btnStart = (Button) findViewById(R.id.btnStart);
@@ -305,7 +319,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     /* This class communicates with the ThingSee client on a separate thread (background processing)
      * so that it does not slow down the user interface (UI)
      */
-    private class TalkToThingsee extends AsyncTask<String, String, String> {
+    private class TalkToThingsee extends AsyncTask<String, Environment, String> {
         ThingSee thingsee;
         List<Location> coordinates = new ArrayList<Location>();
 
@@ -398,7 +412,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         @Override
-        protected void onProgressUpdate(String... params) {
+        protected void onProgressUpdate(Environment... params) {
 
         }
     }
