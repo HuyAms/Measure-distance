@@ -2,6 +2,7 @@ package com.example.trinddinhhuy.thingsee;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 
@@ -12,8 +13,13 @@ import android.os.AsyncTask;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -42,11 +48,19 @@ import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.zip.Inflater;
+
+import static com.example.trinddinhhuy.thingsee.R.styleable.MenuItem;
+import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_HYBRID;
+import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_NONE;
+import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_NORMAL;
+import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_SATELLITE;
+import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_TERRAIN;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
     private static final int MAXPOSITIONS = 20;
     private static final String PREFERENCEID = "Credentials";
-    private static final int SLEEP_TIME = 10000 ; //10s
+    private static final int SLEEP_TIME = 10000; //10s
 
     private String username, password;
     private ArrayList<Location> locationList;
@@ -64,13 +78,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Chronometer chronometer;
     private Environment environment;
     private boolean isNewAccount;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
 
         requestData();
 
@@ -85,12 +98,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void requestData() {
         //Timer task
         timer = new Timer();
-        t = new TimerTask(){
-            public void run(){
+        t = new TimerTask() {
+            public void run() {
                 Log.i("TIMER", "timer");
                 MainActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        progressDialog.cancel();
                         // we make the request to the Thingsee cloud server in backgroud
                         // (AsyncTask) so that we don't block the UI (to prevent ANR state, Android Not Responding)
                         // This code will always run on the UI thread, therefore is safe to modify UI elements.
@@ -141,17 +155,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 btnSwitchAccount.setEnabled(false);
 
                 //Set chronometer
-                chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener(){
+                chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
                     @Override
                     public void onChronometerTick(Chronometer cArg) {
                         long time = SystemClock.elapsedRealtime() - cArg.getBase();
-                        int h   = (int)(time /3600000);
-                        int m = (int)(time - h*3600000)/60000;
-                        int s= (int)(time - h*3600000- m*60000)/1000 ;
-                        String hh = h < 10 ? "0"+h: h+"";
-                        String mm = m < 10 ? "0"+m: m+"";
-                        String ss = s < 10 ? "0"+s: s+"";
-                        cArg.setText(hh+":"+mm+":"+ss);
+                        int h = (int) (time / 3600000);
+                        int m = (int) (time - h * 3600000) / 60000;
+                        int s = (int) (time - h * 3600000 - m * 60000) / 1000;
+                        String hh = h < 10 ? "0" + h : h + "";
+                        String mm = m < 10 ? "0" + m : m + "";
+                        String ss = s < 10 ? "0" + s : s + "";
+                        cArg.setText(hh + ":" + mm + ":" + ss);
                     }
                 });
                 chronometer.setBase(SystemClock.elapsedRealtime());
@@ -159,6 +173,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 //disable start button util end button is clicked
                 btnStart.setEnabled(false);
+
+                //Enable button end
+                btnEnd.setEnabled(true);
 
             }
         });
@@ -179,9 +196,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 btnSwitchAccount.setEnabled(true);
 
                 //Calculate average speed
-                long time = (SystemClock.elapsedRealtime() - chronometer.getBase())/1000; //seconds
-                long averageSpeed = (long) (distance/time);
-                txtAverageSpeed.setText(averageSpeed+" m/s");
+                long time = (SystemClock.elapsedRealtime() - chronometer.getBase()) / 1000; //seconds
+                long averageSpeed = (long) (distance / time);
+                txtAverageSpeed.setText(averageSpeed + " m/s");
+
+                //Disable button end util button start is pressed
+                btnEnd.setEnabled(false);
 
             }
         });
@@ -200,7 +220,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-
     }
 
 
@@ -216,6 +235,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         txtDistance = (TextView) findViewById(R.id.txtDistance);
         txtAverageSpeed = (TextView) findViewById(R.id.txtAverageSpeed);
         chronometer = (Chronometer) findViewById(R.id.chronmeter);
+
+        //Progress dialog
+        progressDialog = new ProgressDialog(MainActivity.this);
+        progressDialog.setTitle("Notification");
+        String message = "Data is loading. Please wait ...";
+        SpannableString ss1=  new SpannableString(message);
+        ss1.setSpan(new RelativeSizeSpan(1.3f), 0, ss1.length(), 0);
+        progressDialog.setMessage(ss1);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setCanceledOnTouchOutside(false);
+        progressDialog.show();
 
         // Set up tab host
         tabHost = (TabHost) findViewById(R.id.tabHost);
@@ -267,10 +297,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         dialogMsg.setText(msg);
 
-        if(isNewAccount){
+        if (isNewAccount) {
             dialogUsername.setText("");
             dialogPassword.setText("");
-        }else {
+        } else {
             dialogUsername.setText(username);
             dialogPassword.setText(password);
         }
@@ -309,8 +339,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-
-
     //Google map
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -325,9 +353,39 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         marker.showInfoWindow();
     }
 
+    //Create option menu for setting map view
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(android.view.MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.normal:
+                item.setChecked(true);
+                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                return true;
+            case R.id.satellite:
+                if (!item.isChecked()) {
+                    item.setChecked(true);
+                    mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                }
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+    }
+
     /* This class communicates with the ThingSee client on a separate thread (background processing)
-     * so that it does not slow down the user interface (UI)
-     */
+             * so that it does not slow down the user interface (UI)
+             */
     private class TalkToThingsee extends AsyncTask<String, Environment, String> {
         ThingSee thingsee;
         List<Location> coordinates = new ArrayList<Location>();
@@ -340,19 +398,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             // here we make the request to the cloud server for MAXPOSITION number of coordinates
             try {
 
-                    thingsee = new ThingSee(username, password);
+                thingsee = new ThingSee(username, password);
 
-                    JSONArray events = thingsee.Events(thingsee.Devices(), MAXPOSITIONS);
-                    //System.out.println(events);
-                    coordinates = thingsee.getPath(events);
-                    environmentList = thingsee.getEnvironment(events);
-                    //Log.i("ENVIRONMENT", environmentList.size()+"");
+                JSONArray events = thingsee.Events(thingsee.Devices(), MAXPOSITIONS);
+                //System.out.println(events);
+                coordinates = thingsee.getPath(events);
+                environmentList = thingsee.getEnvironment(events);
+                //Log.i("ENVIRONMENT", environmentList.size()+"");
 
 //                for (Location coordinate: coordinates)
 //                    System.out.println(coordinate);
-                      result = "OK";
+                result = "OK";
 
-               // publishProgress(result);
+                // publishProgress(result);
 
             } catch (Exception e) {
                 Log.d("NET", "Communication error: " + e.getMessage());
@@ -392,7 +450,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                         //Toast.makeText(MainActivity.this, newDistance + "", Toast.LENGTH_SHORT).show();
                         //add distance only if new distance>1 and time is different form previous time
-                        if (newDistance > 1 && previousTime!=time)
+                        if (newDistance > 1 && previousTime != time)
                             distance = distance + newDistance;
                     }
 
