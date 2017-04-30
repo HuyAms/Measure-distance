@@ -137,6 +137,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 distance = 0;
                 txtEndPosition.setText("");
 
+                //disable switch account util end button is clicked
+                btnSwitchAccount.setEnabled(false);
+
                 //Set chronometer
                 chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener(){
                     @Override
@@ -171,8 +174,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 //Set chronmeter
                 chronometer.stop();
 
-                //Enable start button
+                //Enable start and switch account button
                 btnStart.setEnabled(true);
+                btnSwitchAccount.setEnabled(true);
 
                 //Calculate average speed
                 long time = (SystemClock.elapsedRealtime() - chronometer.getBase())/1000; //seconds
