@@ -166,13 +166,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View v) {
                 txtEndPosition.setText(" (" + latitude + " , " +
                         longitude + ")");
-                txtDistance.setText(Float.toString(distance));
+                txtDistance.setText(Float.toString(distance) + " m");
 
                 //Set chronmeter
                 chronometer.stop();
 
                 //Enable start button
                 btnStart.setEnabled(true);
+
+                //Calculate average speed
+                long time = (SystemClock.elapsedRealtime() - chronometer.getBase())/1000; //seconds
+                long averageSpeed = (long) (distance/time);
+                txtAverageSpeed.setText(averageSpeed+" m/s");
 
             }
         });
