@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Chronometer chronometer;
     private Environment environment;
     private boolean isNewAccount;
+    private boolean isBeingLogIn;
     private ProgressDialog progressDialog;
 
     @Override
@@ -312,6 +313,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .setPositiveButton("Log In",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
+                                isBeingLogIn = false;
                                 // get user input and set it to result
                                 username = dialogUsername.getText().toString();
                                 password = dialogPassword.getText().toString();
@@ -410,8 +412,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                    System.out.println(coordinate);
                 result = "OK";
 
-                // publishProgress(result);
-
             } catch (Exception e) {
                 Log.d("NET", "Communication error: " + e.getMessage());
             }
@@ -466,7 +466,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             } else {
                 // no, tell that to the user and ask a new username/password pair
-                queryDialog(MainActivity.this, getResources().getString(R.string.info_prompt));
+                if(!isBeingLogIn) {
+                    queryDialog(MainActivity.this, getResources().getString(R.string.info_prompt));
+                    isBeingLogIn = true;
+                }
             }
             myAdapter.notifyDataSetChanged();
         }
