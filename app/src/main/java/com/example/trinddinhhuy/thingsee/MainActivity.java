@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int MAXPOSITIONS = 20;
     private static final String PREFERENCEID = "Credentials";
     private static final int SLEEP_TIME = 10000; //10s
+    private static final int DELAY_TIME = 0;
 
     private String username, password;
     private ArrayList<Location> locationList;
@@ -116,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
 
         };
-        timer.scheduleAtFixedRate(t, SLEEP_TIME, SLEEP_TIME);
+        timer.scheduleAtFixedRate(t, DELAY_TIME, SLEEP_TIME);
     }
 
     private void checkAccount() {
@@ -151,6 +152,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         longitude + ")");
                 distance = 0;
                 txtEndPosition.setText("");
+                txtAverageSpeed.setText("");
+                txtDistance.setText("");
 
                 //disable switch account util end button is clicked
                 btnSwitchAccount.setEnabled(false);
