@@ -203,8 +203,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 //Calculate average speed
                 long time = (SystemClock.elapsedRealtime() - chronometer.getBase()) / 1000; //seconds
-                long averageSpeed = (long) (distance / time);
-                txtAverageSpeed.setText(averageSpeed + " m/s");
+                double averageSpeed = (double) (distance / time);
+                txtAverageSpeed.setText(((double)Math.round(averageSpeed*100))/100 + " m/s");
 
                 //Disable button end util button start is pressed
                 btnEnd.setEnabled(false);
