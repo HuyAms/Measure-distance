@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Thingsee</string>
+    <string name="app_name">Measure distance</string>
 
     <string name="prompt">No credentials set, give Thingsee username and password</string>
 
