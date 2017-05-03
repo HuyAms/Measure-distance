@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Measure Distance.iml" filepath="$PROJECT_DIR$/Measure Distance.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Measure-distance.iml" filepath="$PROJECT_DIR$/Measure-distance.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

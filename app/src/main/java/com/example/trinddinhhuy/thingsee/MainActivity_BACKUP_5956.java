@@ -62,8 +62,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int MAXPOSITIONS = 20;
     private static final String PREFERENCEID = "Credentials";
     private static final int SLEEP_TIME = 10000; //10s
+<<<<<<< HEAD
     private static final int DELAY_TIME = 0; //0s
     
+=======
+    private static final int DELAY_TIME = 0;
+
+>>>>>>> c3f419a070a3d7e04a44ce2fd4449fbcbe806ea4
     private String username, password;
     private ArrayList<Location> locationList;
     private List<Environment> environmentList;

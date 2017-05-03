@@ -154,8 +154,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         longitude + ")");
                 distance = 0;
                 txtEndPosition.setText("");
-                txtAverageSpeed.setText("");
-                txtDistance.setText("");
 
                 //disable switch account util end button is clicked
                 btnSwitchAccount.setEnabled(false);
