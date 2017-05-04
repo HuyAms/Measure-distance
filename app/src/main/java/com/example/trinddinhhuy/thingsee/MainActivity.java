@@ -5,31 +5,25 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.location.Location;
 import android.os.AsyncTask;
-
+import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.trinddinhhuy.adapter.CustomAdapter;
 import com.example.trinddinhhuy.adapter.CustomInfoAdapter;
@@ -45,25 +39,16 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.zip.Inflater;
-
-import static com.example.trinddinhhuy.thingsee.R.styleable.MenuItem;
-import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_HYBRID;
-import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_NONE;
-import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_NORMAL;
-import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_SATELLITE;
-import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_TERRAIN;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
     private static final int MAXPOSITIONS = 20;
     private static final String PREFERENCEID = "Credentials";
     private static final int SLEEP_TIME = 10000; //10s
     private static final int DELAY_TIME = 1000; //1s
-    
+
     private String username, password;
     private ArrayList<Location> locationList;
     private List<Environment> environmentList;
@@ -203,9 +188,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 //Calculate average speed
                 long time = (SystemClock.elapsedRealtime() - chronometer.getBase()) / 1000; //seconds
-                
+
                 double averageSpeed = (double) (distance / time);
-                txtAverageSpeed.setText(((double)Math.round(averageSpeed*100))/100 + " m/s");
+                txtAverageSpeed.setText(((double) Math.round(averageSpeed * 100)) / 100 + " m/s");
 
                 //Disable button end util button start is pressed
                 btnEnd.setEnabled(false);
@@ -247,7 +232,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         progressDialog = new ProgressDialog(MainActivity.this);
         progressDialog.setTitle("Notification");
         String message = "Data is loading. Please wait ...";
-        SpannableString ss1=  new SpannableString(message);
+        SpannableString ss1 = new SpannableString(message);
         ss1.setSpan(new RelativeSizeSpan(1.3f), 0, ss1.length(), 0);
         progressDialog.setMessage(ss1);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -473,7 +458,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             } else {
                 // no, tell that to the user and ask a new username/password pair
-                if(!isBeingLogIn) {
+                if (!isBeingLogIn) {
                     queryDialog(MainActivity.this, getResources().getString(R.string.info_prompt));
                     isBeingLogIn = true;
                 }
