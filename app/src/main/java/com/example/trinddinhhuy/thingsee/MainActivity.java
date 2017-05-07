@@ -3,10 +3,14 @@ package com.example.trinddinhhuy.thingsee;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -67,6 +71,47 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean isNewAccount;
     private boolean isBeingLogIn;
     private ProgressDialog progressDialog;
+    private boolean isConnectedToInternet;
+
+    //Check Internet connection
+    BroadcastReceiver internetReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+            alertDialogBuilder.setTitle("No Internet connection");
+            alertDialogBuilder.setMessage("Please connect to working Internet connection");
+            alertDialogBuilder.setCancelable(false);
+            alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            });
+            final AlertDialog alertDialog = alertDialogBuilder.create();
+
+            if(connectivityManager.getActiveNetworkInfo()==null){
+                //Show alert dialog
+                alertDialog.show();
+
+                isConnectedToInternet = false;
+
+                //set listener to OK button
+                Button btnPositive = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                btnPositive.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //Toast.makeText(MainActivity.this, "Clicked", Toast.LENGTH_SHORT).show();
+                        if(isConnectedToInternet) alertDialog.dismiss();
+                    }
+                });
+            }else{
+                isConnectedToInternet = true;
+            }
+
+        }
+    };
 
 
     @Override
@@ -81,7 +126,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         addControls();
 
         addListeners();
-
     }
 
     private void requestData() {
@@ -478,4 +522,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(internetReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(internetReceiver);
+    }
 }
+
+
