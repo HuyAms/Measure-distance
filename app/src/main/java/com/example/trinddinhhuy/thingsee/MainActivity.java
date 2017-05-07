@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private String username, password;
     private ArrayList<Location> locationList;
     private List<Environment> environmentList;
+    private List<Double> speedList;
+    private double speed;
     private CustomAdapter myAdapter;
     private TabHost tabHost;
     private Button btnStart, btnEnd, btnSwitchAccount;
@@ -304,9 +306,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         tabHost.addTab(tab3);
 
 
-        // initialize location and environment list
+        // initialize location, speed and environment list
         locationList = new ArrayList<>();
         environmentList = new ArrayList<>();
+        speedList = new ArrayList<>();
 
         // setup the adapter for the array
         myAdapter = new CustomAdapter(MainActivity.this, R.layout.custom_listview, locationList);
@@ -387,7 +390,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng location = new LatLng(latitude, longitude);
         Marker marker = mMap.addMarker(new MarkerOptions().position(location).title("You are here"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 16));
-        mMap.setInfoWindowAdapter(new CustomInfoAdapter(MainActivity.this, environment));
+        mMap.setInfoWindowAdapter(new CustomInfoAdapter(MainActivity.this, environment, speed));
         marker.showInfoWindow();
     }
 
@@ -443,6 +446,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 //System.out.println(events);
                 coordinates = thingsee.getPath(events);
                 environmentList = thingsee.getEnvironment(events);
+                speedList = thingsee.getSpeed(events);
                 //Log.i("ENVIRONMENT", environmentList.size()+"");
 
 //                for (Location coordinate: coordinates)
@@ -461,13 +465,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         protected void onPostExecute(String result) {
             // check that the background communication with the client was succesfull
             if (result.equals("OK")) {
+                //get speed
+                speed = speedList.get(0);
+
                 // now the environmentList variable has those coordinates
                 // elements of these environmentList is the Environmentn object who has
                 // fields for temperature, humidity and airPressure when the position was fixed
-                for (int i = 0; i < environmentList.size(); i++) {
-                    environment = environmentList.get(i);
-                    Log.i("ENVIRONMENT", environment.toString());
-                }
+                environment = environmentList.get(0);
 
                 // now the coordinates variable has those coordinates
                 // elements of these coordinates is the Location object who has

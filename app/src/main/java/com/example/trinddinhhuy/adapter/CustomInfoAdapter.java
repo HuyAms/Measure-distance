@@ -17,10 +17,12 @@ import com.google.android.gms.maps.model.Marker;
 public class CustomInfoAdapter implements GoogleMap.InfoWindowAdapter {
     private Activity context;
     private Environment environment;
+    private double speed;
 
-    public CustomInfoAdapter(Activity context, Environment environment){
+    public CustomInfoAdapter(Activity context, Environment environment, double speed){
         this.context = context;
         this.environment = environment;
+        this.speed = speed;
     }
 
     @Override
@@ -38,7 +40,7 @@ public class CustomInfoAdapter implements GoogleMap.InfoWindowAdapter {
         TextView txtHumidity = (TextView) v.findViewById(R.id.txtHumidity);
         TextView txtAirPressure = (TextView) v.findViewById(R.id.txtAirPressure);
 
-        txtSpeed.setText(Double.toString(environment.getSpeed())+ " m/s");
+        txtSpeed.setText(Double.toString(speed)+ " m/s");
         txtTemperature.setText(Double.toString(environment.getTemperature())+ "C");
         txtHumidity.setText(Double.toString(environment.getHumidity())+ "%");
         txtAirPressure.setText(Double.toString(environment.getAirPressure())+ " hPA");
