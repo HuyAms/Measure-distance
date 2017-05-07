@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String PREFERENCEID = "Credentials";
     private static final int SLEEP_TIME = 10000; //10s
     private static final int DELAY_TIME = 1000; //1s
+    private static final int MAP_ZOOM = 18;
 
     private String username, password;
     private ArrayList<Location> locationList;
@@ -75,7 +76,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean isBeingLogIn;
     private ProgressDialog progressDialog;
     private boolean isConnectedToInternet;
-
     //Check Internet connection
     BroadcastReceiver internetReceiver = new BroadcastReceiver() {
         @Override
@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             alertDialogBuilder.setTitle("No Internet connection");
             alertDialogBuilder.setMessage("Please connect to working Internet connection");
             alertDialogBuilder.setCancelable(false);
-            alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            alertDialogBuilder.setPositiveButton("RETRY", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
 
@@ -107,6 +107,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     public void onClick(View v) {
                         //Toast.makeText(MainActivity.this, "Clicked", Toast.LENGTH_SHORT).show();
                         if(isConnectedToInternet) alertDialog.dismiss();
+                        else{
+                            alertDialog.dismiss();
+                            alertDialog.show();
+                        }
                     }
                 });
             }else{
@@ -214,7 +218,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 //Enable button end
                 btnEnd.setEnabled(true);
-
             }
         });
 
@@ -317,8 +320,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // then connect it to the list in application's layout
         ListView listView = (ListView) findViewById(R.id.mylist);
         listView.setAdapter(myAdapter);
-
-
     }
 
     private void queryDialog(Context context, String msg) {
@@ -388,8 +389,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.clear();
         //Add marker for specific location
         LatLng location = new LatLng(latitude, longitude);
-        Marker marker = mMap.addMarker(new MarkerOptions().position(location).title("You are here"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 16));
+        Marker marker = mMap.addMarker(new MarkerOptions().position(location));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, MAP_ZOOM));
         mMap.setInfoWindowAdapter(new CustomInfoAdapter(MainActivity.this, environment, speed));
         marker.showInfoWindow();
     }
@@ -424,13 +425,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(internetReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(internetReceiver);
+    }
 
     /* This class communicates with the ThingSee client on a separate thread (background processing)
              * so that it does not slow down the user interface (UI)
              */
     private class TalkToThingsee extends AsyncTask<String, Environment, String> {
         ThingSee thingsee;
-        List<Location> coordinates = new ArrayList<Location>();
+        List<Location> coordinates = new ArrayList<>();
 
         @Override
         protected String doInBackground(String... params) {
@@ -506,7 +519,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     myAdapter.notifyDataSetChanged();
                 }
-
             } else {
                 // no, tell that to the user and ask a new username/password pair
                 if (!isBeingLogIn) {
@@ -528,19 +540,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         protected void onProgressUpdate(Environment... params) {
 
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-        registerReceiver(internetReceiver, filter);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        unregisterReceiver(internetReceiver);
     }
 }
 
