@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private double latitude;
     private double longitude;
     private float distance;
+    private double previousTime;
     private GoogleMap mMap;
     private Timer timer;
     private TimerTask t;
@@ -474,11 +475,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 for (int i = 0; i < coordinates.size(); i++) {
                     Location loc = coordinates.get(i);
 
+                    //Set previous time
+                    previousTime = coordinates.get(0).getTime();
+
                     //measure distance
                     if (i > 0) {
                         Location previousLoc = coordinates.get(i - 1);
                         //get previous time and time
-                        long previousTime = previousLoc.getTime();
                         long time = loc.getTime();
 
                         //calculate distance from location to previous location
@@ -486,7 +489,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                         //Toast.makeText(MainActivity.this, newDistance + "", Toast.LENGTH_SHORT).show();
                         //add distance only if new distance>1 and time is different form previous time
-                        if (newDistance > 1 && previousTime != time)
+                        if (newDistance > 1 && previousTime <= time)
                             distance = distance + newDistance;
                     }
 
