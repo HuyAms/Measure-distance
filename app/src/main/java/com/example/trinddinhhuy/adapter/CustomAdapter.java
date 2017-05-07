@@ -14,6 +14,9 @@ import android.widget.TextView;
 
 import com.example.trinddinhhuy.thingsee.R;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -25,6 +28,7 @@ public class CustomAdapter extends ArrayAdapter<Location> {
     private Activity context;
     private int resource;
     private List<Location> objects;
+    private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy - hh:mm:ss aaa");
 
     public CustomAdapter(@NonNull Activity context, @LayoutRes int resource, @NonNull List<Location> objects) {
         super(context, resource, objects);
@@ -43,10 +47,14 @@ public class CustomAdapter extends ArrayAdapter<Location> {
         TextView txtLocation = (TextView)row.findViewById(R.id.txtLocation);
 
         Location location = objects.get(position);
-        Date date = new Date(location.getTime());
+        String StringDate = sdf.format(new Date(location.getTime()));
 
-        txtDate.setText(date.toString());
-        txtLocation.setText(" (" + location.getLatitude() + " , " +
+        txtDate.setText(StringDate);
+
+        //Date date = new Date(location.getTime());
+        //txtDate.setText(date.toString());
+
+        txtLocation.setText("(" + location.getLatitude() + " , " +
                 location.getLongitude() + ")");
 
         return row;
