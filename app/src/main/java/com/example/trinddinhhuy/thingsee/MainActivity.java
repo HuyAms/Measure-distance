@@ -538,7 +538,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                         //Toast.makeText(MainActivity.this, newDistance + "", Toast.LENGTH_SHORT).show();
                         //add distance only if new distance>1 and time is different form previous time
-                        if (newDistance > 1 && previousTime <= time)
+                        //and speed is not equal to 0
+                        if (newDistance > 1 && previousTime <= time && speed!=0)
                             distance = distance + newDistance;
                     }
 
