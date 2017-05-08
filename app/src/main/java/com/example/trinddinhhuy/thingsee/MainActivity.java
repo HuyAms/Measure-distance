@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                txtStartingPosition.setText(" (" + latitude + " , " +
+                txtStartingPosition.setText("(" + latitude + " , " +
                         longitude + ")");
                 distance = 0;
                 txtEndPosition.setText("");
@@ -257,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         btnEnd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                txtEndPosition.setText(" (" + latitude + " , " +
+                txtEndPosition.setText("(" + latitude + " , " +
                         longitude + ")");
                 txtDistance.setText(Float.toString(distance) + " m");
 
