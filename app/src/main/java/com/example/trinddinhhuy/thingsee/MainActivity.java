@@ -2,6 +2,7 @@ package com.example.trinddinhhuy.thingsee;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
@@ -137,6 +138,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mBuilder.setContentText("Pleasse check your Internet Connection");
         mBuilder.setSmallIcon(R.drawable.internet_notification_icon);
         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.app_icon_sq));
+        mBuilder.setVisibility(Notification.VISIBILITY_PUBLIC);
 
         Intent resultIntent = new Intent(this, MainActivity.class);
         PendingIntent resultPendingIntent =
