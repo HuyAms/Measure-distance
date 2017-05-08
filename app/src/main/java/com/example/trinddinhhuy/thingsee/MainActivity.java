@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void showInternetConnectionNotification() {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(MainActivity.this);
         mBuilder.setContentTitle("Network error");
-        mBuilder.setContentText("Pleasse check your Internet Connection");
+        mBuilder.setContentText("Please check your Internet Connection");
         mBuilder.setSmallIcon(R.drawable.internet_notification_icon);
         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.app_icon_sq));
         mBuilder.setVisibility(Notification.VISIBILITY_PUBLIC);

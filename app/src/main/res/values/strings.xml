@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Measure distance</string>
+    <string name="app_name">MoT</string>
 
     <string name="prompt">No credentials set, log into Thingsee Cloud with username and password.</string>
 
