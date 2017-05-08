@@ -1,14 +1,14 @@
 <resources>
     <string name="app_name">Measure distance</string>
 
-    <string name="prompt">No credentials set, log into Thingsee Cloud with username and password</string>
+    <string name="prompt">No credentials set, give Thingsee username and password</string>
 
-    <string name="info_prompt">Invalid credentials or no connection to Thingsee Cloud, try again</string>
+    <string name="info_prompt">Invalid username/password or no connection to Thingsee, give Thingsee username and password</string>
 
-    <string name="no_connection">No connection to Thingsee Cloud</string>
+    <string name="no_connection">No connection to Thingsee</string>
 
     <string name="title_activity_maps">Map</string>
 
-    <string name="map_type_normal">Normal view</string>
-    <string name="map_type_satellite">Satellite view</string>
+    <string name="map_type_normal">MAP_NORMAL</string>
+    <string name="map_type_satellite">MAP_SATELLITE</string>
 </resources>
