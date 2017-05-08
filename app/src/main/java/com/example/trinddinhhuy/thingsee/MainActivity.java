@@ -2,6 +2,8 @@ package com.example.trinddinhhuy.thingsee;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,11 +12,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
 import android.text.SpannableString;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
@@ -76,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean isBeingLogIn;
     private ProgressDialog progressDialog;
     private boolean isConnectedToInternet;
+    private int internettNotificationID;
     //Check Internet connection
     BroadcastReceiver internetReceiver = new BroadcastReceiver() {
         @Override
@@ -95,6 +101,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             final AlertDialog alertDialog = alertDialogBuilder.create();
 
             if(connectivityManager.getActiveNetworkInfo()==null){
+                //show notification
+                showInternetConnectionNotification();
                 //Show alert dialog
                 alertDialog.show();
 
@@ -108,6 +116,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         //Toast.makeText(MainActivity.this, "Clicked", Toast.LENGTH_SHORT).show();
                         if(isConnectedToInternet) alertDialog.dismiss();
                         else{
+                            NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                            mNotifyMgr.cancel(internettNotificationID);
                             alertDialog.dismiss();
                             alertDialog.show();
                         }
@@ -119,6 +129,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }
     };
+
+    private void showInternetConnectionNotification() {
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(MainActivity.this);
+        mBuilder.setContentTitle("Network error");
+        mBuilder.setContentText("Cannot connect to the Internet. Pleasse check your Internet Connection");
+        mBuilder.setSmallIcon(R.drawable.internet_notification_icon);
+
+        Intent resultIntent = new Intent(this, MainActivity.class);
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        mBuilder.setContentIntent(resultPendingIntent);
+
+        Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        mBuilder.setSound(uri);
+        internettNotificationID = 001;
+        NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotifyMgr.notify(internettNotificationID, mBuilder.build());
+    }
 
 
     @Override
