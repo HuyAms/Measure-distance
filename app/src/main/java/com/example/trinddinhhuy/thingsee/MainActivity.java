@@ -11,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
@@ -135,6 +136,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mBuilder.setContentTitle("Network error");
         mBuilder.setContentText("Cannot connect to the Internet. Pleasse check your Internet Connection");
         mBuilder.setSmallIcon(R.drawable.internet_notification_icon);
+        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.app_icon_sq));
 
         Intent resultIntent = new Intent(this, MainActivity.class);
         PendingIntent resultPendingIntent =
